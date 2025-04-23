@@ -38,7 +38,6 @@ const HomeScreen = (props: HomeScreenProps) => {
     onClose: () => {
     }
   });
-
   const fetchBooks = useCallback(async () => {
     try {
       bookApi.listBooks({search: searchText})
@@ -48,7 +47,6 @@ const HomeScreen = (props: HomeScreenProps) => {
 
     } catch (error) {
       console.error('Error:', error);
-      // Remplacer Alert.alert par CustomAlert
       setAlert({
         onClose: () => {
         },

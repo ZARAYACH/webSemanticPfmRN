@@ -6,8 +6,10 @@ import {StyleSheet} from 'react-native';
 import UserHomeScreen from './UserHomeScreen';
 import StatusBooksScreen from './StatusBooksScreen';
 import ProfileUserScreen from './ProfileUserScreen';
+import {RootStackParamList} from "@/app/(tabs)/HomePage";
 
-const Tab = createBottomTabNavigator();
+
+const Tab = createBottomTabNavigator<RootStackParamList>();
 
 const TabNavigator = () => {
   return (
@@ -15,10 +17,13 @@ const TabNavigator = () => {
       screenOptions={({route}) => ({
         tabBarIcon: ({focused, color, size}) => {
           switch (route.name) {
-            case 'Home' : return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color}/>
-            case 'StatusBooks': return <Ionicons name={focused ? 'book' : 'book-outline'} size={size} color={color}/>
-            case 'Profile' : return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color}/>
-         }
+            case 'Home' :
+              return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color}/>
+            case 'StatusBooks':
+              return <Ionicons name={focused ? 'book' : 'book-outline'} size={size} color={color}/>
+            case 'Profile' :
+              return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color}/>
+          }
         },
         tabBarActiveTintColor: '#4F6CE1',
         tabBarInactiveTintColor: '#A0AEC0',
@@ -30,17 +35,17 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Home"
         component={UserHomeScreen}
-        options={{tabBarLabel: 'Accueil'}}
+        options={{tabBarLabel: 'Home'}}
       />
       <Tab.Screen
         name="StatusBooks"
         component={StatusBooksScreen}
-        options={{tabBarLabel: 'Statuts'}}
+        options={{tabBarLabel: 'Status'}}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileUserScreen}
-        options={{tabBarLabel: 'Profil'}}
+        options={{tabBarLabel: 'Profile'}}
       />
     </Tab.Navigator>
   );

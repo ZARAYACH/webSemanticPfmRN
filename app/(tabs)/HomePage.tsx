@@ -19,6 +19,9 @@ import SettingsScreen from "../screens/SettingsScreen";
 import LoginScreen from "@/app/screens/LoginScreen";
 import HomeScreen from "@/app/screens/HomeScreen";
 import AdminBorrowManagementScreen from "@/app/screens/AdminBorrowManagementScreen";
+import UserHomeScreen from "@/app/screens/UserHomeScreen";
+import StatusBooksScreen from "@/app/screens/StatusBooksScreen";
+import ProfileUserScreen from "@/app/screens/ProfileUserScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -26,26 +29,35 @@ export type RootStackParamList = {
   ForgotPassword: undefined
   ResetPassword: undefined
   AdminTabs: {
-    screens : {
+    screens: {
       AdminHome: undefined;
       BorrowManagement: undefined;
     },
   }
   AddBook: undefined
   EditBook: {
-    bookId : number
+    bookId: number
   }
   BookDetails: {
-    bookId : number
+    bookId: number
   }
-  UserTabs: undefined
+  UserTabs: {
+    screens: {
+      Home: undefined,
+      StatusBooks: undefined,
+      Profile: undefined
+    }
+  }
   DetailsUser: undefined
   EditProfile: undefined
   ChangePassword: undefined
   BorrowHistory: undefined
   Settings: undefined
-  AdminHome : undefined
-  BorrowManagement : undefined
+  AdminHome: undefined
+  BorrowManagement: undefined
+  Home: undefined,
+  StatusBooks: undefined,
+  Profile: undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -79,7 +91,7 @@ export default function HomePage() {
     <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
-        headerShown : false,
+        headerShown: false,
         headerStyle: {
           backgroundColor: '#2196F3',
         },
@@ -143,6 +155,18 @@ export default function HomePage() {
       <Stack.Screen
         name="BorrowManagement"
         component={AdminBorrowManagementScreen}
+      />
+      <Stack.Screen
+        name="Home"
+        component={UserHomeScreen}
+      />
+      <Stack.Screen
+        name="StatusBooks"
+        component={StatusBooksScreen}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileUserScreen}
       />
 
     </Stack.Navigator>

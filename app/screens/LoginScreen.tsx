@@ -44,232 +44,230 @@ type LoginScreenProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen = (props: LoginScreenProps) => {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
 
-  const [alert, setAlert] = useState<Alert>();
+    const [alert, setAlert] = useState<Alert>();
 
-  const createAuthHeaders = (username: string, password: string): HTTPHeaders => {
-    const encodedCredentials = btoa(`${username}:${password}`);
-    return {
-      Authorization: `Basic ${encodedCredentials}`
-    };
-  }
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateForm = () => {
-    if (email && !email.trim() || !validateEmail(email)) {
-      setEmailError("Email is required");
-      return false;
-    }
-    if (!password) {
-      setPasswordError("Password is required");
-      return false;
-    }
-    return true;
-  };
-
-  const handleLogin = async () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    authApi.login(async (requestContext) => {
+    const createAuthHeaders = (username: string, password: string): HTTPHeaders => {
+      const encodedCredentials = btoa(`${username}:${password}`);
       return {
-        headers: {
-          ...requestContext.init.headers,
-          ...createAuthHeaders(email, password),
-        },
-      } as RequestInit;
-    }).then(async value => {
-      await AsyncStorage.setItem("token", value.accessToken);
-      const decodedToken = value.accessToken && decodeJwt(value.accessToken);
-      if (decodedToken && (decodedToken['ROLES'] as string[])
-        .find(value => value == "ROLE_ADMIN")) {
-        props.navigation.replace("AdminHome")
-      } else {
-        props.navigation.replace("UserTabs")
+        Authorization: `Basic ${encodedCredentials}`
+      };
+    }
+
+    const validateEmail = (email: string) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    };
+
+    const validateForm = useCallback((email: string, password: string) => {
+      if (email && !email.trim() || !validateEmail(email)) {
+        setEmailError("Email is required");
+        return false;
       }
-    }).catch(reason => {
+      if (!password) {
+        setPasswordError("Password is required");
+        return false;
+      }
+      return true;
+    }, []);
+
+    const handleLogin = useCallback(async (email: string, password: string) => {
+      if (!validateForm(email, password)) return;
+      setIsLoading(true);
+
+      authApi.login(async (requestContext) => {
+        return {
+          headers: {
+            ...requestContext.init.headers,
+            ...createAuthHeaders(email, password),
+          },
+        } as RequestInit;
+      }).then(async value => {
+        await AsyncStorage.setItem("token", value.accessToken);
+        const decodedToken = value.accessToken && decodeJwt(value.accessToken);
+        if (decodedToken && (decodedToken['ROLES'] as string[])
+          .find(value => value == "ROLE_ADMIN")) {
+          props.navigation.replace("AdminHome")
+        } else {
+          props.navigation.replace("Home")
+        }
+      }).catch(reason => {
         console.error("Error can't connect:", reason);
         setAlert({
           visible: true,
-          title: "Couldn't connect",
-          message: reason,
+          title: "Bad credentials",
+          message: "Bad credentials",
           type: "error",
           onClose: () => {
           },
           buttons: []
         });
-        setIsLoading(false);
-      }
-    )
-  }
-  const validateToken = useCallback(async (token: string) => {
-    try {
-      const decodedToken = decodeJwt(token);
-      const now = Math.floor(Date.now() / 1000);
-      const isExpired = decodedToken.exp !== undefined && decodedToken.exp < now;
-      const isAccess = decodedToken.TOKEN_TYPE === "ACCESS";
+      }).finally(() => setIsLoading(false)
+      )
+      return;
+    }, [])
 
-      if (isExpired || !isAccess) {
-        throw new Error("Invalid token (Expired or is not Access type)")
-      }
+    const validateToken = useCallback(async (token: string) => {
+      try {
+        const decodedToken = decodeJwt(token);
+        const now = Math.floor(Date.now() / 1000);
+        const isExpired = decodedToken.exp !== undefined && decodedToken.exp < now;
+        const isAccess = decodedToken.TOKEN_TYPE === "ACCESS";
 
-      return decodedToken;
-    } catch (e) {
-      await AsyncStorage.setItem("token", "")
-      console.error("Token decoding error:", e);
-      return null
-    }
-  }, [props.navigation]);
+        if (isExpired || !isAccess) {
+          throw new Error("Invalid token (Expired or is not Access type)")
+        }
 
-  useEffect(() => {
-    AsyncStorage.getItem("token").then(value => {
-      if (!value) {
-        return;
+        return decodedToken;
+      } catch (e) {
+        await AsyncStorage.setItem("token", "")
+        console.error("Token decoding error:", e);
+        return null
       }
-      validateToken(value).then(payload => {
-        if (!payload) {
-          props.navigation.replace("Login");
+    }, [props.navigation]);
+
+    useEffect(() => {
+      AsyncStorage.getItem("token").then(value => {
+        if (!value) {
           return;
         }
-        const roles = payload['ROLES'] as string[];
-        if (roles?.includes("ROLE_ADMIN")) {
-          props.navigation.replace("AdminHome");
-        } else {
-          props.navigation.replace("UserTabs");
-        }
+        validateToken(value).then(payload => {
+          if (!payload) {
+            props.navigation.replace("Login");
+            return;
+          }
+          const roles = payload['ROLES'] as string[];
+          if (roles?.includes("ROLE_ADMIN")) {
+            props.navigation.replace("AdminHome");
+          } else {
+            props.navigation.replace("Home");
+          }
+        });
       });
-    });
-  }, []);
+    }, []);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#f6f7fb"/>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoid}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.header}>
-            <LinearGradient
-              colors={['#3a416f', '#141727']}
-              style={styles.logoContainer}
-            >
-              <FontAwesome5 name="book-reader" size={32} color="#FFFFFF"/>
-            </LinearGradient>
-            <Text style={styles.title}>Bibliothèque Virtuelle</Text>
-            <Text style={styles.subtitle}>Votre espace de lecture personnel</Text>
-          </View>
-
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Connexion</Text>
-
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Adresse email</Text>
-              <View style={[styles.inputContainer, emailError ? styles.inputError : null]}>
-                <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon}/>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Entrez votre email"
-                  placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (validateEmail(text)) setEmailError("");
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#f6f7fb"/>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoid}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.header}>
+              <LinearGradient
+                colors={['#3a416f', '#141727']}
+                style={styles.logoContainer}
+              >
+                <FontAwesome5 name="book-reader" size={32} color="#FFFFFF"/>
+              </LinearGradient>
+              <Text style={styles.title}>Bibliothèque Virtuelle</Text>
+              <Text style={styles.subtitle}>Votre espace de lecture personnel</Text>
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Mot de passe</Text>
-              <View style={[styles.inputContainer, passwordError ? styles.inputError : null]}>
-                <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon}/>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Entrez votre mot de passe"
-                  placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (text) setPasswordError("");
-                  }}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity
-                  style={styles.passwordToggle}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="#666"
+            <View style={styles.formContainer}>
+              <Text style={styles.formTitle}>Connexion</Text>
+
+              <View style={styles.inputWrapper}>
+                <Text style={styles.inputLabel}>Adresse email</Text>
+                <View style={[styles.inputContainer, emailError ? styles.inputError : null]}>
+                  <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon}/>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Entrez votre email"
+                    placeholderTextColor="#999"
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                   />
-                </TouchableOpacity>
+                </View>
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
               </View>
-              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+              <View style={styles.inputWrapper}>
+                <Text style={styles.inputLabel}>Mot de passe</Text>
+                <View style={[styles.inputContainer, passwordError ? styles.inputError : null]}>
+                  <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon}/>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Entrez votre mot de passe"
+                    placeholderTextColor="#999"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (text) setPasswordError("");
+                    }}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    style={styles.passwordToggle}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? "eye-off" : "eye"}
+                      size={20}
+                      color="#666"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+              </View>
+
+              <TouchableOpacity
+                disabled={isLoading}
+                onPress={() => handleLogin(email, password)}
+                style={styles.buttonContainer}
+              >
+                <LinearGradient
+                  colors={['#2B6CB0', '#2B6CB0']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 0}}
+                  style={styles.loginButton}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#FFFFFF" size="small"/>
+                  ) : (
+                    <View style={styles.buttonContent}>
+                      <FontAwesome5 name="sign-in-alt" size={16} color="#FFFFFF"
+                                    style={styles.buttonIcon}/>
+                      <Text style={styles.buttonText}>SE CONNECTER</Text>
+                    </View>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
 
             <TouchableOpacity
-              disabled={isLoading}
-              onPress={handleLogin}
-              style={styles.buttonContainer}
+              style={styles.registerLink}
+              // onPress={() => navigation.navigate("Register")}
             >
-              <LinearGradient
-                colors={['#2B6CB0', '#2B6CB0']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.loginButton}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small"/>
-                ) : (
-                  <View style={styles.buttonContent}>
-                    <FontAwesome5 name="sign-in-alt" size={16} color="#FFFFFF"
-                                  style={styles.buttonIcon}/>
-                    <Text style={styles.buttonText}>SE CONNECTER</Text>
-                  </View>
-                )}
-              </LinearGradient>
+              <Text style={styles.registerText}>
+                You don't have an account? <Text style={styles.registerTextBold}>Sign up</Text>
+              </Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
 
-          <TouchableOpacity
-            style={styles.registerLink}
-            // onPress={() => navigation.navigate("Register")}
-          >
-            <Text style={styles.registerText}>
-              You don't have an account? <Text style={styles.registerTextBold}>Sign up</Text>
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <CustomAlert
-        visible={alert?.visible!}
-        title={alert?.title!}
-        message={alert?.message!}
-        type={alert?.type!}
-        buttons={alert?.buttons || []}
-        onClose={() => setAlert(prev => ({...prev!, visible: false}))}
-      />
-    </SafeAreaView>
-  );
-};
+        <CustomAlert
+          visible={alert?.visible!}
+          title={alert?.title!}
+          message={alert?.message!}
+          type={alert?.type!}
+          buttons={alert?.buttons || []}
+          onClose={() => setAlert(prev => ({...prev!, visible: false}))}
+        />
+      </SafeAreaView>
+    );
+  }
+;
 
 const styles = StyleSheet.create({
   container: {
