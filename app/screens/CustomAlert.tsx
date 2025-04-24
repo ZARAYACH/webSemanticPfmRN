@@ -41,10 +41,10 @@ const CustomAlert = (alert: Alert) => {
   let iconName, gradientColors, iconColor, iconBgColor;
   switch (alert.type) {
     case 'success':
-      iconName = 'checkmark-circle';
+      iconName = 'checkmark';
       gradientColors = ['#38A169', '#10B981'];
       iconColor = '#ECFDF5';
-      iconBgColor = 'rgba(16, 185, 129, 0.15)';
+      iconBgColor = 'rgb(255,255,255)';
       break;
     case 'error':
       iconName = 'close-circle';

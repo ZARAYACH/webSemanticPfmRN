@@ -132,7 +132,7 @@ const BookDetailsScreenUser = (props: BookDetailsScreenUserProps) => {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={50} color="#E53E3E"/>
-        <Text style={styles.errorText}>Impossible de charger les détails du livre</Text>
+        <Text style={styles.errorText}>Can't load bookd details</Text>
         <TouchableOpacity
           style={styles.errorButton}
           onPress={() => props.navigation.goBack()}
@@ -143,7 +143,7 @@ const BookDetailsScreenUser = (props: BookDetailsScreenUserProps) => {
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}
           >
-            <Text style={styles.errorButtonText}>Retour</Text>
+            <Text style={styles.errorButtonText}>Back</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -164,7 +164,7 @@ const BookDetailsScreenUser = (props: BookDetailsScreenUserProps) => {
         >
           <Ionicons name="arrow-back" size={24} color="white"/>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Détails du livre</Text>
+        <Text style={styles.headerTitle}>Books details</Text>
       </LinearGradient>
 
       <ScrollView
@@ -200,7 +200,7 @@ const BookDetailsScreenUser = (props: BookDetailsScreenUserProps) => {
                 disabled={book.availableCopies! < 0}
               >
                 <LinearGradient
-                  colors={['#4F6CE1', '#7D55F3']}
+                  colors={['#020609FF', '#020609FF']}
                   style={styles.errorButtonGradient}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 0}}

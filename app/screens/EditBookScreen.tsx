@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Ionicons} from '@expo/vector-icons';
 import {LinearGradient} from 'expo-linear-gradient';
 import CustomAlert from './CustomAlert';
@@ -57,38 +56,19 @@ const EditBookScreen = (props: EditBookScreenProps) => {
     });
     setAlertVisible(true);
   };
-
-  useEffect(() => {
-    const fetchBookDetails = async () => {
-      setIsLoading(true);
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          showCustomAlert('Erreur', 'Vous devez être connecté pour modifier un livre', 'error', [
-            {text: 'OK', onPress: () => props.navigation.navigate("BookDetails", {bookId})}
-          ]);
-          return;
-        }
-
-        bookApi.findBookById({id: bookId})
-          .then(value => setBook(value))
-          .then(() => setIsLoading(false))
-          .catch(reason => {
-            console.error(reason)
-            setIsLoading(false);
-          })
-
-      } catch (error) {
-        console.error('Erreur lors du chargement des détails:', error);
-        showCustomAlert('Erreur', 'Impossible de charger les détails du livre', 'error', [
+  const fetchBookDetails = useCallback(() => {
+    setIsLoading(true);
+    bookApi.findBookById({id: bookId})
+      .then(value => setBook(value))
+      .then(() => setIsLoading(false))
+      .catch(reason => {
+        showCustomAlert('Error', 'Cant load books', 'error', [
           {text: 'OK', onPress: () => props.navigation.navigate("BookDetails", {bookId})}
         ]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBookDetails().then();
+      }).finally(() => setIsLoading(false))
+  }, []);
+  useEffect(() => {
+    fetchBookDetails();
   }, [bookId, props.navigation]);
 
   const handleSubmit = async () => {

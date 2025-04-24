@@ -214,7 +214,7 @@ const LoginScreen = (props: LoginScreenProps) => {
                 style={styles.buttonContainer}
               >
                 <LinearGradient
-                  colors={['#2B6CB0', '#2B6CB0']}
+                  colors={['#020609', '#020609FF']}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 0}}
                   style={styles.loginButton}
@@ -223,9 +223,7 @@ const LoginScreen = (props: LoginScreenProps) => {
                     <ActivityIndicator color="#FFFFFF" size="small"/>
                   ) : (
                     <View style={styles.buttonContent}>
-                      <FontAwesome5 name="sign-in-alt" size={16} color="#FFFFFF"
-                                    style={styles.buttonIcon}/>
-                      <Text style={styles.buttonText}>SE CONNECTER</Text>
+                      <Text style={styles.buttonText}>Login</Text>
                     </View>
                   )}
                 </LinearGradient>

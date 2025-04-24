@@ -42,7 +42,7 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
             type: 'error',
             buttons: [{
               text: 'OK',
-              onPress: () => props.navigation.navigate("AdminHome")
+              onPress: () => props.navigation.navigate("AdminTabs", {screen : "HomePage"})
             }],
             onClose: () => {
             }
@@ -59,7 +59,7 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
     setAlert({
       visible: true,
       title: 'Confirmation',
-      message: 'Êtes-vous sûr de vouloir supprimer ce livre ?',
+      message: 'Are you sure you want to delete this book ?',
       type: 'warning',
       onClose: () => {
       },
@@ -82,7 +82,7 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
                   type: 'success',
                   buttons: [{
                     text: 'OK',
-                    onPress: () => props.navigation.navigate("AdminHome")
+                    onPress: () => props.navigation.navigate("AdminTabs", {screen : "HomePage"})
                   }],
                   onClose: () => {
                   }
@@ -125,10 +125,10 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={50} color="#E53E3E"/>
-        <Text style={styles.errorText}>Impossible de charger les détails du livre</Text>
+        <Text style={styles.errorText}>Couldn't load books details</Text>
         <TouchableOpacity
           style={styles.errorButton}
-          onPress={() => props.navigation.navigate("AdminHome")}
+          onPress={() => props.navigation.navigate("AdminTabs", {screen : "HomePage"})}
         >
           <LinearGradient
             colors={['#4F6CE1', '#7D55F3']}
@@ -154,11 +154,11 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
       >
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => props.navigation.navigate("AdminHome")}
+          onPress={() => props.navigation.navigate("AdminTabs", {screen : "HomePage"})}
         >
           <Ionicons name="arrow-back" size={24} color="white"/>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Détails du livre</Text>
+        <Text style={styles.headerTitle}>Book details</Text>
       </LinearGradient>
 
       <ScrollView
@@ -225,7 +225,6 @@ const BookDetailsScreen = (props: BookDetailsScreenProps) => {
         </View>
       </ScrollView>
 
-      {/* CustomAlert component */}
       <CustomAlert
         visible={alert.visible}
         title={alert.title}

@@ -91,7 +91,7 @@ const AddBookScreen = (props: AddBookScreenProps) => {
       >
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => props.navigation.navigate("AdminHome")}
+          onPress={() => props.navigation.navigate("AdminTabs", {screen : "HomePage"})}
         >
           <Ionicons name="arrow-back" size={24} color="white"/>
         </TouchableOpacity>

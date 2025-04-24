@@ -1,19 +1,42 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Ionicons} from '@expo/vector-icons';
 import {StyleSheet} from 'react-native';
 
 import UserHomeScreen from './UserHomeScreen';
-import StatusBooksScreen from './StatusBorrowsScreen';
+import StatusBorrowsScreen from './StatusBorrowsScreen';
 import ProfileUserScreen from './ProfileUserScreen';
 import {RootStackParamList} from "@/app/(tabs)/HomePage";
-import StatusBorrowsScreen from "./StatusBorrowsScreen";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {decodeJwt} from "jose";
+import AdminTabNavigator from "@/app/Styles/AdminTabNavigator";
+import HomeScreen from "@/app/screens/HomeScreen";
+import AdminBorrowManagementScreen from "@/app/screens/AdminBorrowManagementScreen";
 
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 const TabNavigator = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem("token").then(value => {
+      if (!value) {
+        return;
+      }
+      const decodedToken = decodeJwt(value);
+      if (!decodedToken) {
+        return;
+      }
+
+      const roles = decodedToken['ROLES'] as string[];
+      if (roles?.includes("ROLE_ADMIN")) {
+        setIsAdmin(true)
+      }
+
+    });
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -49,6 +72,12 @@ const TabNavigator = () => {
         component={ProfileUserScreen}
         options={{tabBarLabel: 'Profile'}}
       />
+      {isAdmin && <Tab.Screen name={"AdminHome"}
+                              component={HomeScreen}
+                              options={{tabBarLabel : "admin Books"}}></Tab.Screen>}
+      {isAdmin && <Tab.Screen name={"BorrowManagement"}
+                              component={AdminBorrowManagementScreen}
+                              options={{tabBarLabel : "admin Borrows"}}></Tab.Screen>}
     </Tab.Navigator>
   );
 };

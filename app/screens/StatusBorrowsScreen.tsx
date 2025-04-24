@@ -147,7 +147,7 @@ const StatusBorrowsScreen = (props: StatusBorrowsScreenProps) => {
                   onPress={() => handleReturnBorrowing(item.id)}
               >
                   <LinearGradient
-                      colors={['#3B82F6', '#2563EB']}
+                      colors={['#020609FF', '#020609FF']}
                       style={styles.actionGradient}
                       start={{x: 0, y: 0}}
                       end={{x: 1, y: 0}}
@@ -157,8 +157,6 @@ const StatusBorrowsScreen = (props: StatusBorrowsScreenProps) => {
                   </LinearGradient>
               </TouchableOpacity>
           }
-
-
         </View>
       </View>
     );
