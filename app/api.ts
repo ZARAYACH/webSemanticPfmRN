@@ -9,6 +9,7 @@ import {
   UsersApi
 } from "@/app/openapi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {navigate} from "@/app/navigation/NavigationService";
 
 const tokensApi = new TokensApi();
 
@@ -22,6 +23,7 @@ const conf = new Configuration({
       }
       if (context.response?.status === 401 &&
         !context.url.includes("/login")) {
+
         const resp = await tokensApi.refreshToken().catch(reason => console.error(reason));
         if (resp && resp?.["access_token"]) {
           await AsyncStorage.setItem('token', resp.access_token)
@@ -29,6 +31,9 @@ const conf = new Configuration({
         console.log("token refreshed")
         return context.init && await fetch(context.url, context.init);
       }
+
+      navigate("Login");
+
     }
   }],
 });
@@ -38,6 +43,7 @@ const bookApi = new BookControllerApi(conf);
 const borrowingApi = new BorrowingControllerApi(conf);
 const signupApi = new SignupApi(conf);
 const usersApi = new UsersApi(conf);
+const signUpApi = new SignupApi(conf);
 
 
 export {

@@ -67,7 +67,7 @@ const UserHomeScreen = (props: UserHomeScreenProps) => {
   const renderBookItem = ({item}: any) => (
     <TouchableOpacity
       style={styles.bookCard}
-      onPress={() => props.navigation.navigate('BookDetails', {bookId: item.id})}
+      onPress={() => props.navigation.navigate('DetailsUser', {bookId: item.id})}
       activeOpacity={0.7}
     >
       <View style={styles.bookInfo}>
@@ -120,7 +120,7 @@ const UserHomeScreen = (props: UserHomeScreenProps) => {
           renderItem={renderBookItem}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.bookList}
-          numColumns={2}
+          numColumns={1}
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
               {searchQuery.length > 0 ? (
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     borderColor: '#E2E8F0',
     borderWidth: 1,
-    height: 250,
+    height: 80,
   },
   imageContainer: {
     position: 'relative',

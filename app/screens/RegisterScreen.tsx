@@ -1,78 +1,78 @@
-import React, { useState } from "react";
+import React, {useCallback, useState} from "react";
 import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  SafeAreaView,
   ActivityIndicator,
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
   ScrollView,
   StatusBar,
-  Dimensions
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from "@react-navigation/native";
-import CustomAlert from './CustomAlert'; // Import du composant CustomAlert
+import {FontAwesome5, Ionicons, MaterialIcons} from '@expo/vector-icons';
+import {LinearGradient} from 'expo-linear-gradient';
+import CustomAlert from './CustomAlert';
+import {Alert} from "@/app/screens/LoginScreen";
+import {PostUserDto} from "@/app/openapi";
+import {signupApi} from "@/app/api";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
+import {RootStackParamList} from "@/app/(tabs)/HomePage";
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-const RegisterScreen = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "Register">;
+
+const RegisterScreen = (props: RegisterScreenProps) => {
+  const [postUser, setPostUser] = useState<PostUserDto>(() => ({
+    password: '',
+    id: 0,
+    email: '',
+    role: 'USER'
+  }));
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  
-  // Ajout de l'état pour CustomAlert
-  const [alert, setAlert] = useState({
+
+  const [alert, setAlert] = useState<Alert>({
     visible: false,
     title: '',
     message: '',
     type: 'success',
-    buttons: []
+    buttons: [],
+    onClose: () => {
+    }
   });
 
-  const navigation = useNavigation();
-
-  const validateEmail = (email) => {
+  const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const validateForm = () => {
+  const validateForm = (userDto: PostUserDto) => {
     let isValid = true;
 
-    if (!name.trim()) {
-      setNameError("Le nom est requis");
+    if (!userDto.email.trim()) {
+      setEmailError("Email is required");
       isValid = false;
-    } else {
-      setNameError("");
-    }
-
-    if (!email.trim()) {
-      setEmailError("L'email est requis");
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      setEmailError("Veuillez entrer un email valide");
+    } else if (!validateEmail(userDto.email)) {
+      setEmailError("Enter valid email");
       isValid = false;
     } else {
       setEmailError("");
     }
 
-    if (!password) {
-      setPasswordError("Le mot de passe est requis");
+    if (!userDto.password) {
+      setPasswordError("Password is required");
       isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Le mot de passe doit contenir au moins 6 caractères");
+    } else if (userDto.password.length < 6) {
+      setPasswordError("Enter strong password");
       isValid = false;
     } else {
       setPasswordError("");
@@ -81,87 +81,67 @@ const RegisterScreen = () => {
     return isValid;
   };
 
-  const handleRegister = async () => {
-    if (!validateForm()) return;
+  const handleRegister = useCallback((postUser: PostUserDto) => {
+    if (!validateForm(postUser)) return;
 
     setIsLoading(true);
-    try {
-      await axios.post("http://192.168.1.172:5000/api/auth/register", {
-        name,
-        email,
-        password
-      });
-      
-      // Remplacer Alert.alert par CustomAlert
-      setAlert({
-        visible: true,
-        title: "Inscription réussie",
-        message: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
-        type: "success",
-        buttons: [{ 
-          text: "OK", 
-          onPress: () => navigation.navigate("Login") 
-        }]
-      });
-    } catch (error) {
-      console.error("Erreur d'inscription:", error);
-      
-      let errorMessage = "Une erreur est survenue lors de l'inscription";
-      if (error.response) {
-        if (error.response.status === 409) {
-          errorMessage = "Cet email est déjà utilisé";
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-      }
-      
-      // Remplacer Alert.alert par CustomAlert
-      setAlert({
-        visible: true,
-        title: "Échec de l'inscription",
-        message: errorMessage,
-        type: "error",
-        buttons: [{ text: "OK", onPress: () => {} }]
-      });
-    } finally {
+    signupApi.signUp({postUserDto: postUser})
+      .then(() => {
+        setAlert({
+          visible: true,
+          title: "Success",
+          message: "Signed up successfully",
+          type: "success",
+          buttons: [{
+            text: "OK",
+            onPress: () => props.navigation.navigate("Login")
+          }],
+          onClose: () => {
+          }
+        })
+      })
+      .then(value => props.navigation.navigate("Login"))
+
+      .catch(reason => {
+        setAlert({
+          visible: true,
+          title: "Error",
+          message: "error",
+          type: "error",
+          buttons: [{
+            text: "OK", onPress: () => {
+            }
+          }], onClose: () => {
+          }
+        })
+      }).finally(() => {
       setIsLoading(false);
-    }
-  };
+    })
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#f6f7fb" />
+      <StatusBar barStyle="light-content" backgroundColor="#f6f7fb"/>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoid}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.header}>
-            <LinearGradient
-              colors={['#3a416f', '#141727']}
-              style={styles.logoContainer}
-            >
-              <FontAwesome5 name="book-reader" size={32} color="#FFFFFF" />
-            </LinearGradient>
-            <Text style={styles.title}>Bibliothèque Virtuelle</Text>
-            <Text style={styles.subtitle}>Créez votre espace de lecture personnel</Text>
-          </View>
 
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Inscription</Text>
-            
+            <Text style={styles.formTitle}>Sign up</Text>
+
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Nom complet</Text>
+              <Text style={styles.inputLabel}>Name</Text>
               <View style={[styles.inputContainer, nameError ? styles.inputError : null]}>
-                <MaterialIcons name="person" size={20} color="#666" style={styles.inputIcon} />
+                <MaterialIcons name="person" size={20} color="#666" style={styles.inputIcon}/>
                 <TextInput
                   style={styles.input}
-                  placeholder="Entrez votre nom"
+                  placeholder="Name"
                   placeholderTextColor="#999"
-                  value={name}
+                  value={postUser.firstName}
                   onChangeText={(text) => {
-                    setName(text);
-                    if (text.trim()) setNameError("");
+                    setPostUser(prevState => ({...prevState, firstName: text}))
                   }}
                 />
               </View>
@@ -169,17 +149,16 @@ const RegisterScreen = () => {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Adresse email</Text>
+              <Text style={styles.inputLabel}>Email</Text>
               <View style={[styles.inputContainer, emailError ? styles.inputError : null]}>
-                <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon} />
+                <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon}/>
                 <TextInput
                   style={styles.input}
                   placeholder="Entrez votre email"
                   placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (validateEmail(text)) setEmailError("");
+                  value={postUser.email}
+                  onChangeText={(email) => {
+                    setPostUser(prevState => ({...prevState, email}))
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -191,15 +170,14 @@ const RegisterScreen = () => {
             <View style={styles.inputWrapper}>
               <Text style={styles.inputLabel}>Mot de passe</Text>
               <View style={[styles.inputContainer, passwordError ? styles.inputError : null]}>
-                <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon} />
+                <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon}/>
                 <TextInput
                   style={styles.input}
                   placeholder="Entrez votre mot de passe"
                   placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (text.length >= 6) setPasswordError("");
+                  value={postUser.password}
+                  onChangeText={(password) => {
+                    setPostUser(prevState => ({...prevState, password}))
                   }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
@@ -220,48 +198,31 @@ const RegisterScreen = () => {
 
             <TouchableOpacity
               disabled={isLoading}
-              onPress={handleRegister}
+              onPress={() => handleRegister(postUser)}
               style={styles.buttonContainer}
             >
               <LinearGradient
                 colors={['#2B6CB0', '#1A365D']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
                 style={styles.registerButton}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color="#FFFFFF" size="small"/>
                 ) : (
                   <View style={styles.buttonContent}>
-                    <FontAwesome5 name="user-plus" size={16} color="#FFFFFF" style={styles.buttonIcon} />
+                    <FontAwesome5 name="user-plus" size={16} color="#FFFFFF" style={styles.buttonIcon}/>
                     <Text style={styles.buttonText}>CRÉER UN COMPTE</Text>
                   </View>
                 )}
               </LinearGradient>
             </TouchableOpacity>
 
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OU</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.socialContainer}>
-              <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#4F6CE1' }]}>
-                <FontAwesome5 name="facebook-f" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#E53E3E' }]}>
-                <FontAwesome5 name="google" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#141727' }]}>
-                <FontAwesome5 name="apple" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
           </View>
-          
+
           <TouchableOpacity
             style={styles.loginLink}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => props.navigation.navigate("Login")}
           >
             <Text style={styles.loginText}>
               Déjà membre ? <Text style={styles.loginTextBold}>Se connecter</Text>
@@ -269,7 +230,7 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-      
+
       {/* Ajout du composant CustomAlert */}
       <CustomAlert
         visible={alert.visible}
@@ -277,7 +238,7 @@ const RegisterScreen = () => {
         message={alert.message}
         type={alert.type}
         buttons={alert.buttons}
-        onClose={() => setAlert(prev => ({ ...prev, visible: false }))}
+        onClose={() => setAlert(prev => ({...prev, visible: false}))}
       />
     </SafeAreaView>
   );

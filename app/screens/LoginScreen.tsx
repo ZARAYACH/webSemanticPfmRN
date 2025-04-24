@@ -93,9 +93,9 @@ const LoginScreen = (props: LoginScreenProps) => {
         const decodedToken = value.accessToken && decodeJwt(value.accessToken);
         if (decodedToken && (decodedToken['ROLES'] as string[])
           .find(value => value == "ROLE_ADMIN")) {
-          props.navigation.replace("AdminHome")
+          props.navigation.replace("AdminTabs", {screen : "AdminHome"})
         } else {
-          props.navigation.replace("Home")
+          props.navigation.replace("UserTabs", {screen: "Home"})
         }
       }).catch(reason => {
         console.error("Error can't connect:", reason);
@@ -116,12 +116,10 @@ const LoginScreen = (props: LoginScreenProps) => {
     const validateToken = useCallback(async (token: string) => {
       try {
         const decodedToken = decodeJwt(token);
-        const now = Math.floor(Date.now() / 1000);
-        const isExpired = decodedToken.exp !== undefined && decodedToken.exp < now;
         const isAccess = decodedToken.TOKEN_TYPE === "ACCESS";
 
-        if (isExpired || !isAccess) {
-          throw new Error("Invalid token (Expired or is not Access type)")
+        if (!isAccess) {
+          throw new Error("Invalid token (not Access Token)")
         }
 
         return decodedToken;
@@ -144,9 +142,9 @@ const LoginScreen = (props: LoginScreenProps) => {
           }
           const roles = payload['ROLES'] as string[];
           if (roles?.includes("ROLE_ADMIN")) {
-            props.navigation.replace("AdminHome");
+            props.navigation.replace("AdminTabs", {screen : "AdminHome"});
           } else {
-            props.navigation.replace("Home");
+            props.navigation.navigate("UserTabs", {screen: "Home"});
           }
         });
       });
@@ -160,17 +158,6 @@ const LoginScreen = (props: LoginScreenProps) => {
           style={styles.keyboardAvoid}
         >
           <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.header}>
-              <LinearGradient
-                colors={['#3a416f', '#141727']}
-                style={styles.logoContainer}
-              >
-                <FontAwesome5 name="book-reader" size={32} color="#FFFFFF"/>
-              </LinearGradient>
-              <Text style={styles.title}>Bibliothèque Virtuelle</Text>
-              <Text style={styles.subtitle}>Votre espace de lecture personnel</Text>
-            </View>
-
             <View style={styles.formContainer}>
               <Text style={styles.formTitle}>Connexion</Text>
 
@@ -247,7 +234,7 @@ const LoginScreen = (props: LoginScreenProps) => {
 
             <TouchableOpacity
               style={styles.registerLink}
-              // onPress={() => navigation.navigate("Register")}
+              onPress={() => props.navigation.navigate("Register")}
             >
               <Text style={styles.registerText}>
                 You don't have an account? <Text style={styles.registerTextBold}>Sign up</Text>
@@ -272,18 +259,18 @@ const LoginScreen = (props: LoginScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f6f7fb",
   },
   keyboardAvoid: {
     flex: 1,
+    marginTop: 200
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
+    verticalAlign: "middle"
   },
   header: {
     alignItems: "center",
-    marginVertical: 32,
   },
   logoContainer: {
     width: 70,
@@ -372,15 +359,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#4F6CE1',
-    fontSize: 14,
-    fontWeight: '500',
   },
   buttonContainer: {
     borderRadius: 12,

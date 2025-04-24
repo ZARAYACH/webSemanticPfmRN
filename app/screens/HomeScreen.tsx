@@ -78,46 +78,6 @@ const HomeScreen = (props: HomeScreenProps) => {
     setSearchText(text);
   };
 
-  const handleLogout = async () => {
-    // Remplacer Alert.alert par CustomAlert
-    setAlert({
-      visible: true,
-      onClose: () => {
-      },
-      title: 'Déconnexion',
-      message: 'Êtes-vous sûr de vouloir vous déconnecter ?',
-      type: 'warning',
-      buttons: [
-        {
-          text: 'Annuler',
-          onPress: () => {
-          },
-        },
-        {
-          text: 'Déconnecter',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('token');
-              props.navigation.navigate("Login");
-            } catch (error) {
-              setAlert({
-                onClose: () => {
-                },
-                visible: true,
-                title: 'Erreur',
-                message: 'Problème lors de la déconnexion',
-                type: 'error',
-                buttons: [{
-                  text: 'OK', onPress: () => {
-                  }
-                }]
-              });
-            }
-          },
-        },
-      ]
-    });
-  };
 
   const renderBookItem = ({item}: any) => (
     <TouchableOpacity
@@ -145,16 +105,12 @@ const HomeScreen = (props: HomeScreenProps) => {
   return (
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content"/>
-
-      {/* En-tête avec dégradé */}
       <LinearGradient
-        colors={['#3a416f', '#141727']}
+        colors={['#000000', '#141727']}
         style={styles.headerGradient}
       >
         <Text style={styles.headerTitle}>Library</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="white"/>
-        </TouchableOpacity>
+
       </LinearGradient>
 
       <View style={styles.searchContainer}>
@@ -224,7 +180,7 @@ const HomeScreen = (props: HomeScreenProps) => {
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={['#4F6CE1', '#7D55F3']}
+          colors={['#000000', '#141727']}
           style={styles.addButtonGradient}
           start={{x: 0, y: 0}}
           end={{x: 1, y: 1}}

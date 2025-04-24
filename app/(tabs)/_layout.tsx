@@ -12,9 +12,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
-
-      screenOptions={{
+    <Tabs screenOptions={{
         headerShown: false,
         tabBarStyle: Platform.select({
           default: {

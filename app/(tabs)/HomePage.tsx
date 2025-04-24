@@ -2,8 +2,6 @@ import React, {useEffect, useState} from "react";
 import {createStackNavigator} from "@react-navigation/stack";
 
 import RegisterScreen from "../screens/RegisterScreen";
-import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
-import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 
 import AddBookScreen from "../screens/AddBookScreen";
 import EditBookScreen from "../screens/EditBookScreen";
@@ -13,15 +11,10 @@ import TabNavigator from "../screens/TabNavigator";
 import AdminTabNavigator from "../screens/AdminTabNavigator";
 
 import EditProfileScreen from "../screens/EditProfileScreen";
-import ChangePasswordScreen from "../screens/ChangePasswordScreen";
-import BorrowHistoryScreen from "../screens/BorrowHistoryScreen";
-import SettingsScreen from "../screens/SettingsScreen";
 import LoginScreen from "@/app/screens/LoginScreen";
 import HomeScreen from "@/app/screens/HomeScreen";
 import AdminBorrowManagementScreen from "@/app/screens/AdminBorrowManagementScreen";
-import UserHomeScreen from "@/app/screens/UserHomeScreen";
-import StatusBooksScreen from "@/app/screens/StatusBooksScreen";
-import ProfileUserScreen from "@/app/screens/ProfileUserScreen";
+import {UserDto} from "@/app/openapi";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -29,10 +22,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined
   ResetPassword: undefined
   AdminTabs: {
-    screens: {
-      AdminHome: undefined;
-      BorrowManagement: undefined;
-    },
+    screen: string
   }
   AddBook: undefined
   EditBook: {
@@ -42,22 +32,23 @@ export type RootStackParamList = {
     bookId: number
   }
   UserTabs: {
-    screens: {
-      Home: undefined,
-      StatusBooks: undefined,
-      Profile: undefined
-    }
+    screen: string
   }
-  DetailsUser: undefined
-  EditProfile: undefined
+  DetailsUser: {
+    bookId: number
+  }
+  EditProfile: {
+    user: UserDto
+  }
   ChangePassword: undefined
   BorrowHistory: undefined
   Settings: undefined
   AdminHome: undefined
   BorrowManagement: undefined
-  Home: undefined,
-  StatusBooks: undefined,
+  StatusBorrows: undefined
+  Home: undefined
   Profile: undefined
+
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -99,8 +90,6 @@ export default function HomePage() {
       }}>
       <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
       <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerShown: false}}/>
-      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{headerShown: false}}/>
 
       <Stack.Screen
         name="AdminTabs"
@@ -133,21 +122,7 @@ export default function HomePage() {
         component={EditProfileScreen}
         options={{headerShown: false}}
       />
-      <Stack.Screen
-        name="ChangePassword"
-        component={ChangePasswordScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="BorrowHistory"
-        component={BorrowHistoryScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{headerShown: false}}
-      />
+
       <Stack.Screen
         name="AdminHome"
         component={HomeScreen}
@@ -156,18 +131,7 @@ export default function HomePage() {
         name="BorrowManagement"
         component={AdminBorrowManagementScreen}
       />
-      <Stack.Screen
-        name="Home"
-        component={UserHomeScreen}
-      />
-      <Stack.Screen
-        name="StatusBooks"
-        component={StatusBooksScreen}
-      />
-      <Stack.Screen
-        name="Profile"
-        component={ProfileUserScreen}
-      />
+
 
     </Stack.Navigator>
 

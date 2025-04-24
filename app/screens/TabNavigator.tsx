@@ -4,9 +4,11 @@ import {Ionicons} from '@expo/vector-icons';
 import {StyleSheet} from 'react-native';
 
 import UserHomeScreen from './UserHomeScreen';
-import StatusBooksScreen from './StatusBooksScreen';
+import StatusBooksScreen from './StatusBorrowsScreen';
 import ProfileUserScreen from './ProfileUserScreen';
 import {RootStackParamList} from "@/app/(tabs)/HomePage";
+import StatusBorrowsScreen from "./StatusBorrowsScreen";
+
 
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
@@ -19,7 +21,7 @@ const TabNavigator = () => {
           switch (route.name) {
             case 'Home' :
               return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color}/>
-            case 'StatusBooks':
+            case 'StatusBorrows':
               return <Ionicons name={focused ? 'book' : 'book-outline'} size={size} color={color}/>
             case 'Profile' :
               return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color}/>
@@ -38,8 +40,8 @@ const TabNavigator = () => {
         options={{tabBarLabel: 'Home'}}
       />
       <Tab.Screen
-        name="StatusBooks"
-        component={StatusBooksScreen}
+        name="StatusBorrows"
+        component={StatusBorrowsScreen}
         options={{tabBarLabel: 'Status'}}
       />
       <Tab.Screen

@@ -2,6 +2,7 @@ import React, {useEffect} from 'react';
 import {Animated, Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {Alert} from "./LoginScreen";
+import {LinearGradient} from "expo-linear-gradient";
 
 const CustomAlert = (alert: Alert) => {
   const slideAnim = new Animated.Value(0);
@@ -128,11 +129,24 @@ const CustomAlert = (alert: Alert) => {
                   }}
                 >
                   {index === 0 ? (
-
-                    <Text style={styles.buttonText}>{button.text}</Text>
+                    <LinearGradient
+                      colors={gradientColors as any}
+                      style={styles.buttonGradient}
+                      start={{x: 0, y: 0}}
+                      end={{x: 1, y: 0}}
+                    >
+                      <Text style={styles.buttonText}>{button.text}</Text>
+                    </LinearGradient>
                   ) : (
                     <View style={styles.secondaryButton}>
-                      <Text style={styles.secondaryButtonText}>{button.text}</Text>
+                      <LinearGradient
+                        colors={gradientColors as any}
+                        style={styles.buttonGradient}
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 0}}
+                      >
+                        <Text style={styles.secondaryButtonText}>{button.text}</Text>
+                      </LinearGradient>
                     </View>
                   )}
                 </TouchableOpacity>
