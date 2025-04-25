@@ -36,7 +36,6 @@ const HomeScreen = (props: HomeScreenProps) => {
     }
   });
   const fetchBooks = useCallback(() => {
-    setLoading(true)
     bookApi.listBooks({search: searchText})
       .then(value => {
         setBooks(value.content || []);
@@ -152,12 +151,12 @@ const HomeScreen = (props: HomeScreenProps) => {
                 />
               </View>
               <Text style={styles.emptyTitle}>
-                {searchText.length > 0 ? "Aucun résultat trouvé" : "Aucun livre trouvé"}
+                {searchText.length > 0 ? "Empty book not found" : "Empty book not found"}
               </Text>
               <Text style={styles.emptyText}>
                 {searchText.length > 0
-                  ? `Aucun livre ne correspond à "${searchText}"`
-                  : "Votre bibliothèque est vide. Ajoutez des livres en cliquant sur le bouton ci-dessous."}
+                  ? `No book matches "${searchText}"`
+                  : "Your library is empty. Add books by clicking the button below.."}
               </Text>
             </View>
           )}
