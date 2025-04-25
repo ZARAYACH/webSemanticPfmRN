@@ -61,7 +61,6 @@ const UserHomeScreen = (props: UserHomeScreenProps) => {
     const unsubscribe = props.navigation.addListener('focus', () => {
       fetchBooks(searchQuery);
     });
-    return unsubscribe;
   }, [props.navigation, searchQuery]);
 
   const renderBookItem = ({item}: any) => (
@@ -128,9 +127,9 @@ const UserHomeScreen = (props: UserHomeScreenProps) => {
                   <View style={styles.emptyIconContainer}>
                     <Ionicons name="search-outline" size={60} color="#A0AEC0"/>
                   </View>
-                  <Text style={styles.emptyTitle}>Aucun résultat trouvé</Text>
+                  <Text style={styles.emptyTitle}>Empty library</Text>
                   <Text style={styles.emptyText}>
-                    Aucun livre ne correspond à votre recherche. Essayez avec d'autres termes.
+                    Empty library , couldn't find books
                   </Text>
                 </>
               ) : (

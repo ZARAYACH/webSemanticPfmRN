@@ -10,14 +10,12 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Ionicons} from '@expo/vector-icons';
 import {LinearGradient} from 'expo-linear-gradient';
 import {BookDto} from "@/app/openapi";
 import CustomAlert from "@/app/screens/CustomAlert";
 import {Alert} from "@/app/screens/LoginScreen";
 import {bookApi} from "@/app/api";
-import {useNavigation} from "@react-navigation/native";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackParamList} from "@/app/(tabs)/HomePage";
 
@@ -28,7 +26,6 @@ const HomeScreen = (props: HomeScreenProps) => {
   const [searchText, setSearchText] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const navigation = useNavigation();
   const [alert, setAlert] = useState<Alert>({
     visible: false,
     title: '',
@@ -38,41 +35,36 @@ const HomeScreen = (props: HomeScreenProps) => {
     onClose: () => {
     }
   });
-  const fetchBooks = useCallback(async () => {
-    try {
-      bookApi.listBooks({search: searchText})
-        .then(value => {
-          setBooks(value.content || []);
-        }).catch(reason => console.error(reason))
-
-    } catch (error) {
-      console.error('Error:', error);
-      setAlert({
-        onClose: () => {
-        },
-        visible: true,
-        title: 'Erreur',
-        message: 'Impossible de charger les livres',
-        type: 'error',
-        buttons: [{
-          text: 'OK', onPress: () => {
-          }
-        }]
-      });
-    } finally {
+  const fetchBooks = useCallback(() => {
+    setLoading(true)
+    bookApi.listBooks({search: searchText})
+      .then(value => {
+        setBooks(value.content || []);
+      })
+      .catch(reason => setAlert({
+          onClose: () => {
+          },
+          visible: true,
+          title: 'Error',
+          message: "can't load books ",
+          type: 'error',
+          buttons: [{
+            text: 'OK', onPress: () => {
+            }
+          }]
+        })
+      ).finally(() => {
       setLoading(false);
       setRefreshing(false);
-    }
+    })
   }, [searchText]);
 
   useEffect(() => {
-    fetchBooks().then();
-    const unsubscribe = props.navigation.addListener('focus', () => {
-      fetchBooks().then();
+    fetchBooks();
+    props.navigation.addListener('focus', () => {
+      fetchBooks();
     });
-
-    return unsubscribe;
-  }, [searchText]);
+    }, [searchText]);
 
   const handleSearch = (text: string) => {
     setSearchText(text);
@@ -97,7 +89,7 @@ const HomeScreen = (props: HomeScreenProps) => {
       <View style={styles.centerContainer}>
         <StatusBar barStyle="light-content"/>
         <ActivityIndicator size="large" color="#4F6CE1"/>
-        <Text style={styles.loadingText}>Chargement de votre bibliothèque...</Text>
+        <Text style={styles.loadingText}>Loading library...</Text>
       </View>
     );
   }
@@ -118,7 +110,7 @@ const HomeScreen = (props: HomeScreenProps) => {
           <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon}/>
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher un livre ou un auteur"
+            placeholder="Search"
             placeholderTextColor="#A0AEC0"
             value={searchText}
             onChangeText={handleSearch}
@@ -144,7 +136,7 @@ const HomeScreen = (props: HomeScreenProps) => {
               refreshing={refreshing}
               onRefresh={() => {
                 setRefreshing(true);
-                fetchBooks().then();
+                fetchBooks();
               }}
               colors={["#4F6CE1"]}
               tintColor="#4F6CE1"
@@ -173,7 +165,6 @@ const HomeScreen = (props: HomeScreenProps) => {
         />
       </View>
 
-      {/* Bouton d'ajout avec dégradé */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => props.navigation.navigate('AddBook')}
@@ -189,7 +180,6 @@ const HomeScreen = (props: HomeScreenProps) => {
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Composant CustomAlert */}
       <CustomAlert
         visible={alert.visible}
         title={alert.title}

@@ -9,6 +9,7 @@ import styles from '../Styles/AdminTabNavigator';
 import {RootStackParamList} from "@/app/(tabs)/HomePage";
 import UserHomeScreen from "@/app/screens/UserHomeScreen";
 import TabNavigator from "@/app/screens/TabNavigator";
+import ProfileUserScreen from "@/app/screens/ProfileUserScreen";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
@@ -22,9 +23,8 @@ const AdminTabNavigator = () => {
               return <Ionicons name={focused ? 'library' : 'library-outline'} size={size} color={color}/>
             case 'BorrowManagement' :
               return <Ionicons name={focused ? 'book' : 'book-outline'} size={size} color={color}/>
-            case "UserTabs":
-              return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color}/>
-
+            case 'Profile' :
+              return <Ionicons name={focused ? 'menu' : 'menu'} size={size} color={color}/>
 
           }
         },
@@ -46,9 +46,9 @@ const AdminTabNavigator = () => {
         options={{tabBarLabel: 'Borrows'}}
       />
       <Tab.Screen
-        name="UserTabs"
-        component={TabNavigator}
-        options={{tabBarLabel: 'User'}}
+        name="Profile"
+        component={ProfileUserScreen}
+        options={{tabBarLabel: 'Profile'}}
       />
     </Tab.Navigator>
   );

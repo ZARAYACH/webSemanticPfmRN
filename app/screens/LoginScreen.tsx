@@ -148,7 +148,7 @@ const LoginScreen = (props: LoginScreenProps) => {
           }
         });
       });
-    }, []);
+    }, [props.navigation]);
 
     return (
       <SafeAreaView style={styles.container}>
@@ -159,10 +159,10 @@ const LoginScreen = (props: LoginScreenProps) => {
         >
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.formContainer}>
-              <Text style={styles.formTitle}>Connexion</Text>
+              <Text style={styles.formTitle}>Login</Text>
 
               <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Adresse email</Text>
+                <Text style={styles.inputLabel}>Email</Text>
                 <View style={[styles.inputContainer, emailError ? styles.inputError : null]}>
                   <MaterialIcons name="email" size={20} color="#666" style={styles.inputIcon}/>
                   <TextInput
@@ -179,12 +179,12 @@ const LoginScreen = (props: LoginScreenProps) => {
               </View>
 
               <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Mot de passe</Text>
+                <Text style={styles.inputLabel}>Password</Text>
                 <View style={[styles.inputContainer, passwordError ? styles.inputError : null]}>
                   <MaterialIcons name="lock" size={20} color="#666" style={styles.inputIcon}/>
                   <TextInput
                     style={styles.input}
-                    placeholder="Entrez votre mot de passe"
+                    placeholder="Password"
                     placeholderTextColor="#999"
                     value={password}
                     onChangeText={(text) => {
@@ -260,12 +260,11 @@ const styles = StyleSheet.create({
   },
   keyboardAvoid: {
     flex: 1,
-    marginTop: 200
+    paddingTop: 150
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
-    verticalAlign: "middle"
   },
   header: {
     alignItems: "center",

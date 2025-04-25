@@ -22,11 +22,19 @@ import {authApi, usersApi} from "@/app/api";
 type ProfileUserScreenProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
 const ProfileUserScreen = (props: ProfileUserScreenProps) => {
-  const [userData, setUserData] = useState<UserDto>({
+  const [userData, setUserData] = useState<UserDto>(() => ({
     email: '',
     id: 0
-  });
+  }));
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUserData();
+    props.navigation.addListener('focus', () => {
+      fetchUserData();
+    });
+  }, []);
+
 
   const [alert, setAlert] = useState<Alert>({
     visible: false,
@@ -38,7 +46,7 @@ const ProfileUserScreen = (props: ProfileUserScreenProps) => {
     }
   });
 
-  const fetchUserData = useCallback( () => {
+  const fetchUserData = useCallback(() => {
     setLoading(true);
     usersApi.getMe()
       .then(value => setUserData(value))
@@ -56,10 +64,6 @@ const ProfileUserScreen = (props: ProfileUserScreenProps) => {
           }
         })
       }).finally(() => setLoading(false))
-  }, [props.navigation]);
-
-  useEffect(() => {
-    fetchUserData();
   }, []);
 
   const handleLogout = async () => {
@@ -125,7 +129,7 @@ const ProfileUserScreen = (props: ProfileUserScreenProps) => {
             <View style={styles.menuContainer}>
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() =>  props.navigation.navigate('EditProfile', {user : userData})}
+                onPress={() => props.navigation.navigate('EditProfile', {user: userData})}
               >
                 <Ionicons name="person-outline" size={24} color="#4F6CE1"/>
                 <Text style={styles.menuItemText}>Update my profile</Text>

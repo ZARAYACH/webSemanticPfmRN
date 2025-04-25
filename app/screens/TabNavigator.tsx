@@ -72,12 +72,7 @@ const TabNavigator = () => {
         component={ProfileUserScreen}
         options={{tabBarLabel: 'Profile'}}
       />
-      {isAdmin && <Tab.Screen name={"AdminHome"}
-                              component={HomeScreen}
-                              options={{tabBarLabel : "admin Books"}}></Tab.Screen>}
-      {isAdmin && <Tab.Screen name={"BorrowManagement"}
-                              component={AdminBorrowManagementScreen}
-                              options={{tabBarLabel : "admin Borrows"}}></Tab.Screen>}
+
     </Tab.Navigator>
   );
 };

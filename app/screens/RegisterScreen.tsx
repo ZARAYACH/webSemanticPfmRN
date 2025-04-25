@@ -225,13 +225,12 @@ const RegisterScreen = (props: RegisterScreenProps) => {
             onPress={() => props.navigation.navigate("Login")}
           >
             <Text style={styles.loginText}>
-              Déjà membre ? <Text style={styles.loginTextBold}>Se connecter</Text>
+              Already have an account ? <Text style={styles.loginTextBold}>Login</Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Ajout du composant CustomAlert */}
       <CustomAlert
         visible={alert.visible}
         title={alert.title}

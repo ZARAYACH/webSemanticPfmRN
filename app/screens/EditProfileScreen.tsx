@@ -5,7 +5,7 @@ import {Ionicons} from '@expo/vector-icons';
 import CustomAlert from './CustomAlert';
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackParamList} from "@/app/(tabs)/HomePage";
-import {UserDto} from "@/app/openapi";
+import {PostUserDto} from "@/app/openapi";
 import {usersApi} from "@/app/api";
 import {Alert} from "@/app/screens/LoginScreen";
 
@@ -13,7 +13,15 @@ type EditProfileScreenProps = NativeStackScreenProps<RootStackParamList, "EditPr
 
 const EditProfile = (props: EditProfileScreenProps) => {
 
-  const [userDto, setUserDto] = useState<UserDto>(() => props.route.params.user)
+  const [userDto, setUserDto] = useState<PostUserDto>(() => ({
+    email: props.route.params.user.email,
+    firstName: props.route.params.user.firstName,
+    birthDate: props.route.params.user.birthDate,
+    role: props.route.params.user.role,
+    password: "",
+    id: props.route.params.user.id,
+    lastName: props.route.params.user.lastName
+  }) as PostUserDto);
   const [loading, setLoading] = useState(false);
 
   const [alert, setAlert] = useState<Alert>({
@@ -27,20 +35,20 @@ const EditProfile = (props: EditProfileScreenProps) => {
   });
 
 
-  const handleSave = useCallback((userDto : UserDto) => {
+  const handleSave = useCallback((postUserDto: PostUserDto) => {
     setLoading(true);
     usersApi.modifyUser({
-      id: userDto.id,
-      postUserDto: {
-        id: userDto.id,
-        lastName: userDto.lastName,
-        firstName: userDto.firstName,
-        birthDate: userDto.birthDate,
-        email: userDto.email,
-        password: "",
-        role: "USER"
-      }
-    }).then(value => setUserDto(value))
+      id: userDto.id!,
+      postUserDto
+    }).then(value => setUserDto({
+      id: props.route.params.user.id,
+      lastName: value.lastName,
+      firstName: value.firstName,
+      birthDate: value.birthDate,
+      email: value.email,
+      password: "",
+      role: value.role!
+    }))
       .then(() => setAlert({
         visible: true,
         title: 'Success',
@@ -123,7 +131,19 @@ const EditProfile = (props: EditProfileScreenProps) => {
                 autoCapitalize="none"
               />
             </View>
-
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                textContentType={"password"}
+                style={styles.input}
+                editable={true}
+                secureTextEntry={true}
+                onChangeText={ password => setUserDto(prevState => ({...prevState, password}))}
+                value={userDto.password}
+                placeholder="Password"
+                autoCapitalize="none"
+              />
+            </View>
             <TouchableOpacity
               style={styles.saveButton}
               onPress={() => handleSave(userDto)}

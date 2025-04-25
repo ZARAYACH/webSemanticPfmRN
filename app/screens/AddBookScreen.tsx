@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -22,184 +22,191 @@ type AddBookScreenProps = NativeStackScreenProps<RootStackParamList, "AddBook">;
 
 const AddBookScreen = (props: AddBookScreenProps) => {
 
-  const [book, setBook] = useState<BookDto>({
-    title: '',
-    isbn: '',
-    author: '',
-    id: 0,
-    totalCopies: 1,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
+    const [book, setBook] = useState<BookDto>(() => ({
+      title: '',
+      isbn: '',
+      author: '',
+      id: 0,
+      totalCopies: 1,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }))
 
-  const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<Alert>({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'success',
-    buttons: [],
-    onClose: () => {
-    }
-  });
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    bookApi.createBook1({
-      bookPostDto: {
-        isbn: book.isbn,
-        title: book.title,
-        totalCopies: book.totalCopies,
-        author: book.author
-      }
-    }).then(value => setBook(value))
-      .then(() => setAlert({
-        visible: true,
-        title: 'Book added',
-        message: 'Book added successfully',
-        type: 'success',
-        buttons: [{
-          text: 'OK',
-          onPress: () => {
-            props.navigation.navigate("BookDetails", {bookId: book.id});
-          }
-        }],
-        onClose: () => {
-        }
-      })).catch(reason => setAlert({
-      visible: true,
-      title: 'Échec',
-      message: "Couldn't add book",
-      type: 'error',
-      buttons: [{
-        text: 'OK', onPress: () => {
-        }
-      }],
+    const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState<Alert>({
+      visible: false,
+      title: '',
+      message: '',
+      type: 'success',
+      buttons: [],
       onClose: () => {
       }
+    });
 
-    })).finally(() => setLoading(false))
-  };
+    const handleSubmit = useCallback((book: BookDto) => {
+      setLoading(true);
+      bookApi.createBook1({
+        bookPostDto: {
+          isbn: book.isbn,
+          title: book.title,
+          totalCopies: book.totalCopies,
+          author: book.author
+        }
+      }).then(value => {
+        setBook(value)
+        return value
+      })
+        .then(value => setAlert({
+          visible: true,
+          title: 'Book added',
+          message: 'Book added successfully',
+          type: 'success',
+          buttons: [{
+            text: 'OK',
+            onPress: () => {
+              props.navigation.navigate("BookDetails", {bookId: value.id});
+            }
+          }],
+          onClose: () => {
+          }
+        }))
+        .catch(reason => setAlert({
+          visible: true,
+          title: 'Error',
+          message: "Couldn't add book",
+          type: 'error',
+          buttons: [{
+            text: 'OK', onPress: () => {
+            }
+          }],
+          onClose: () => {
+          }
 
-  return (
-    <View style={styles.mainContainer}>
-      <StatusBar barStyle="light-content"/>
+        }))
+        .finally(() => setLoading(false))
+    }, []);
 
-      <LinearGradient
-        colors={['#3a416f', '#141727']}
-        style={styles.headerGradient}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => props.navigation.navigate("AdminTabs", {screen : "HomePage"})}
+    return (
+      <View style={styles.mainContainer}>
+        <StatusBar barStyle="light-content"/>
+
+        <LinearGradient
+          colors={['#3a416f', '#141727']}
+          style={styles.headerGradient}
         >
-          <Ionicons name="arrow-back" size={24} color="white"/>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add book</Text>
-      </LinearGradient>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => props.navigation.navigate("AdminTabs", {screen: "HomePage"})}
+          >
+            <Ionicons name="arrow-back" size={24} color="white"/>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add book</Text>
+        </LinearGradient>
 
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.card}>
-          <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Titre</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="book-outline" size={20} color="#666" style={styles.inputIcon}/>
-                <TextInput
-                  style={styles.input}
-                  value={book.title}
-                  onChangeText={title => setBook(prevState => ({...prevState, title}))}
-                  placeholder="Title"
-                  placeholderTextColor="#999"
-                />
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.card}>
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Titre</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="book-outline" size={20} color="#666" style={styles.inputIcon}/>
+                  <TextInput
+                    style={styles.input}
+                    value={book.title}
+                    onChangeText={title => setBook(prevState => ({...prevState, title}))}
+                    placeholder="Title"
+                    placeholderTextColor="#999"
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Auteur</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon}/>
-                <TextInput
-                  style={styles.input}
-                  value={book.author}
-                  onChangeText={author => setBook(prevState => ({...prevState, author}))}
-                  placeholder="Author"
-                  placeholderTextColor="#999"
-                />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Auteur</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon}/>
+                  <TextInput
+                    style={styles.input}
+                    value={book.author}
+                    onChangeText={author => setBook(prevState => ({...prevState, author}))}
+                    placeholder="Author"
+                    placeholderTextColor="#999"
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>ISBN</Text>
-              <View style={[styles.inputContainer, styles.textAreaContainer]}>
-                <TextInput
-                  style={[styles.input]}
-                  value={book.isbn}
-                  onChangeText={isbn => setBook(prevState => ({...prevState, isbn}))}
-                  placeholder="ISBN"
-                  placeholderTextColor="#999"
-                  multiline
-                  numberOfLines={4}
-                />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>ISBN</Text>
+                <View style={[styles.inputContainer, styles.textAreaContainer]}>
+                  <TextInput
+                    style={[styles.input]}
+                    value={book.isbn}
+                    onChangeText={isbn => setBook(prevState => ({...prevState, isbn}))}
+                    placeholder="ISBN"
+                    placeholderTextColor="#999"
+                    multiline
+                    numberOfLines={4}
+                  />
+                </View>
               </View>
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Total Copies</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="list-outline" size={20} color="#666" style={styles.inputIcon}/>
-                <TextInput
-                  style={styles.input}
-                  value={String(book.totalCopies)}
-                  onChangeText={totalCopies => setBook(prevState => ({...prevState, totalCopies: Number(totalCopies)}))}
-                  placeholder="Total Copies"
-                  placeholderTextColor="#999"
-                  keyboardType="numeric"
-                />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Total Copies</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="list-outline" size={20} color="#666" style={styles.inputIcon}/>
+                  <TextInput
+                    style={styles.input}
+                    value={String(book.totalCopies)}
+                    onChangeText={totalCopies => setBook(prevState => ({...prevState, totalCopies: Number(totalCopies)}))}
+                    placeholder="Total Copies"
+                    placeholderTextColor="#999"
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
-            </View>
 
 
-            <TouchableOpacity
-              style={[styles.submitButton, loading && styles.disabledButton]}
-              onPress={handleSubmit}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={loading ? ['#90CDF4', '#BEE3F8'] : ['#2B6CB0', '#1A365D']}
-                style={styles.submitGradient}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.disabledButton]}
+                onPress={() => handleSubmit(book)}
+                disabled={loading}
+                activeOpacity={0.8}
               >
-                {loading ? (
-                  <ActivityIndicator size="small" color="white"/>
-                ) : (
-                  <>
-                    <Ionicons name="add-circle-outline" size={20} color="white" style={styles.submitIcon}/>
-                    <Text style={styles.submitButtonText}>Ajouter le livre</Text>
-                  </>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={loading ? ['#90CDF4', '#BEE3F8'] : ['#2B6CB0', '#1A365D']}
+                  style={styles.submitGradient}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 0}}
+                >
+                  {loading ? (
+                    <ActivityIndicator size="small" color="white"/>
+                  ) : (
+                    <>
+                      <Ionicons name="add-circle-outline" size={20} color="white" style={styles.submitIcon}/>
+                      <Text style={styles.submitButtonText}>Ajouter le livre</Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      <CustomAlert
-        visible={alert.visible}
-        title={alert.title}
-        message={alert.message}
-        type={alert.type}
-        buttons={alert.buttons}
-        onClose={() => setAlert(prev => ({...prev, visible: false}))}
-      />
-    </View>
-  );
-};
+        <CustomAlert
+          visible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          type={alert.type}
+          buttons={alert.buttons}
+          onClose={() => setAlert(prev => ({...prev, visible: false}))}
+        />
+      </View>
+    );
+  }
+;
 
 const styles = StyleSheet.create({
   mainContainer: {

@@ -16,6 +16,7 @@ import HomeScreen from "@/app/screens/HomeScreen";
 import AdminBorrowManagementScreen from "@/app/screens/AdminBorrowManagementScreen";
 import {UserDto} from "@/app/openapi";
 
+
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined
@@ -47,7 +48,9 @@ export type RootStackParamList = {
   BorrowManagement: undefined
   StatusBorrows: undefined
   Home: undefined
-  Profile: undefined
+  Profile: {
+    user : UserDto
+  }
 
 };
 
